@@ -1,4 +1,7 @@
-"""on_session_end hook — final checkpoint + markdown digest."""
+"""on_session_end hook — final checkpoint + markdown digest.
+
+Called when a Hermes session terminates.
+"""
 
 from __future__ import annotations
 
@@ -9,18 +12,19 @@ from session import append_event, create_digest, write_checkpoint
 
 
 def on_session_end(
-    session_id: str,
-    state: dict[str, Any] | None = None,
-    events: list[dict[str, Any]] | None = None,
-    sessions_dir: str | None = None,
-    **kwargs,
+    session_id: str = "",
+    **kwargs: Any,
 ) -> None:
     """Save final checkpoint and write session digest.
 
-    Called when a Hermes session terminates.
+    Hermes passes: session_id.
     """
+    sessions_dir = kwargs.get("sessions_dir")
     session_dir = Path(sessions_dir) / session_id if sessions_dir else Path(session_id)
     session_dir.mkdir(parents=True, exist_ok=True)
+
+    events = kwargs.get("events")
+    state = kwargs.get("state")
 
     if events:
         for ev in events:

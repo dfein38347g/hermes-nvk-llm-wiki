@@ -1,17 +1,21 @@
-"""prefetch hook — load checkpoint and inject rehydration context."""
+"""on_session_start hook — load checkpoint and inject rehydration context.
+
+Called when a Hermes session starts. Returns rehydration context if a
+checkpoint exists from a prior session, or None for a fresh session.
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from session import read_checkpoint, rehydrate
 
 
-def prefetch(session_id: str | None = None, **kwargs) -> str | dict | None:
-    """Load session checkpoint and return rehydration context if resuming.
+def on_session_start(session_id: str = "", **kwargs: Any) -> dict | None:
+    """Load session checkpoint on session start for resume context.
 
-    Called before each LLM call. Returns context string or dict if a checkpoint
-    exists, or None for a fresh session.
+    Hermes passes: session_id.
     """
     if not session_id:
         return None

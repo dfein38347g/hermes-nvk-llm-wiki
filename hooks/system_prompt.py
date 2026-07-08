@@ -1,16 +1,21 @@
-"""system_prompt_block hook — lightweight wiki context injection."""
+"""pre_llm_call hook — lightweight wiki context injection.
+
+Called before each LLM call. Returns a context string that Hermes injects
+into the user message (not the system prompt, to preserve prompt cache).
+"""
 
 from __future__ import annotations
 
 from typing import Any
 
 
-def build_system_prompt_block(hub_info: dict[str, Any] | None = None) -> str:
-    """Return a compact wiki-awareness block for the system prompt.
+def pre_llm_call(**kwargs: Any) -> str | None:
+    """Inject wiki hub awareness into the current turn.
 
-    Args:
-        hub_info: Optional dict with topic_count, topics list, last_session date.
+    Hermes passes: session_id, user_message, conversation_history,
+    is_first_turn, model, platform.
     """
+    hub_info = kwargs.get("hub_info")
     if hub_info:
         tc = hub_info.get("topic_count", 0)
         topics = hub_info.get("topics", [])

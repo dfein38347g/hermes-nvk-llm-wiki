@@ -7,9 +7,9 @@ description: >
 author: dfein38347g
 license: MIT
 hooks:
-  - system_prompt_block
-  - prefetch
-  - sync_turn
-  - on_pre_compress
+  - pre_llm_call
+  - on_session_start
+  - post_tool_call
+  - on_session_finalize
   - on_session_end
 requires_env: []

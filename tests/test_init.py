@@ -46,5 +46,8 @@ def test_register_registers_hooks():
     ctx = FakeCtx()
     plugin.register(ctx)
     hook_events = {h["event"] for h in ctx.registered_hooks}
-    assert "system_prompt_block" in hook_events
+    assert "pre_llm_call" in hook_events
+    assert "on_session_start" in hook_events
+    assert "post_tool_call" in hook_events
+    assert "on_session_finalize" in hook_events
     assert "on_session_end" in hook_events

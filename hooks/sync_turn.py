@@ -1,4 +1,8 @@
-"""sync_turn hook — append event to session log after each assistant turn."""
+"""post_tool_call hook — append event to session log after each tool call.
+
+Called after each tool call. Records minimal redacted metadata — not
+full transcripts.
+"""
 
 from __future__ import annotations
 
@@ -8,19 +12,29 @@ from typing import Any
 from session import append_event
 
 
-def sync_turn(
-    session_id: str,
-    turn_data: dict[str, Any] | None = None,
-    **kwargs,
+def post_tool_call(
+    session_id: str = "",
+    tool_name: str = "",
+    tool_call_id: str = "",
+    result: str = "",
+    duration_ms: int = 0,
+    **kwargs: Any,
 ) -> None:
-    """Record a session event after each assistant turn.
+    """Record a session event after each tool call.
 
-    Stores minimal redacted metadata — not full transcripts.
+    Hermes passes: tool_name, args, session_id, task_id, tool_call_id,
+    result, duration_ms.
     """
-    payload = {
-        "files_touched": turn_data.get("files", []) if turn_data else [],
-        "tool_count": turn_data.get("tool_count", 0) if turn_data else 0,
-    }
+    if not session_id:
+        return
     sessions_dir = kwargs.get("sessions_dir")
     session_dir = Path(sessions_dir) / session_id if sessions_dir else Path(session_id)
-    append_event(session_dir, "sync_turn", payload)
+    append_event(
+        session_dir,
+        "post_tool_call",
+        {
+            "tool_name": tool_name,
+            "tool_call_id": tool_call_id,
+            "duration_ms": duration_ms,
+        },
+    )

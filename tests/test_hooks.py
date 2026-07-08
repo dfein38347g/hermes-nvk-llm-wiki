@@ -4,63 +4,65 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from hooks.system_prompt import build_system_prompt_block
+from hooks.system_prompt import pre_llm_call
 from hooks.on_session_end import on_session_end
 
 
-# ── system_prompt_block ────────────────────────────────────────────
+# ── pre_llm_call (was system_prompt_block) ─────────────────────────
 
 
 def test_system_prompt_block_returns_string():
-    result = build_system_prompt_block({"topic_count": 3, "topics": ["test"]})
+    result = pre_llm_call(hub_info={"topic_count": 3, "topics": ["test"]})
     assert isinstance(result, str)
     assert "Wiki hub" in result
 
 
 def test_system_prompt_block_mentions_topic_count():
-    result = build_system_prompt_block({"topic_count": 3, "topics": ["a", "b", "c"]})
+    result = pre_llm_call(hub_info={"topic_count": 3, "topics": ["a", "b", "c"]})
     assert "3" in result
 
 
 def test_system_prompt_block_no_args():
-    result = build_system_prompt_block()
+    result = pre_llm_call()
     assert isinstance(result, str)
     assert "Wiki hub" in result
 
 
 def test_system_prompt_block_omits_topic_count_when_missing():
-    result = build_system_prompt_block({"topics": ["a"]})
+    result = pre_llm_call(hub_info={"topics": ["a"]})
     assert "0" in result
 
 
-# ── prefetch ───────────────────────────────────────────────────────
+# ── on_session_start (was prefetch) ────────────────────────────────
 
 
 def test_prefetch_returns_none_for_no_session_id():
-    from hooks.prefetch import prefetch
+    from hooks.prefetch import on_session_start
 
-    assert prefetch() is None
+    assert on_session_start() is None
 
 
 def test_prefetch_returns_none_when_session_id_is_none():
-    from hooks.prefetch import prefetch
+    from hooks.prefetch import on_session_start
 
-    assert prefetch(session_id=None) is None
+    assert on_session_start(session_id=None) is None
 
 
-# ── sync_turn ──────────────────────────────────────────────────────
+# ── post_tool_call (was sync_turn) ─────────────────────────────────
 
 
 def test_sync_turn_appends_event(tmp_path):
-    from hooks.sync_turn import sync_turn
+    from hooks.sync_turn import post_tool_call
 
     sess_dir = tmp_path / ".sessions"
     session_id = "sess-st-1"
-    turn_data = {"files": ["a.py", "b.py"], "tool_count": 3}
 
-    sync_turn(
+    post_tool_call(
         session_id=session_id,
-        turn_data=turn_data,
+        tool_name="terminal",
+        tool_call_id="call-1",
+        result='{"output": "hello"}',
+        duration_ms=42,
         sessions_dir=str(sess_dir),
     )
 
@@ -68,21 +70,20 @@ def test_sync_turn_appends_event(tmp_path):
     events_file = session_dir / ".session-events.jsonl"
     assert events_file.exists()
     content = events_file.read_text(encoding="utf-8")
-    assert "sync_turn" in content
-    assert "a.py" in content
-    assert "b.py" in content
-    assert '"tool_count": 3' in content
+    assert "post_tool_call" in content
+    assert "terminal" in content
+    assert "call-1" in content
+    assert '"duration_ms": 42' in content
 
 
 def test_sync_turn_empty_turn_data(tmp_path):
-    from hooks.sync_turn import sync_turn
+    from hooks.sync_turn import post_tool_call
 
     sess_dir = tmp_path / ".sessions"
     session_id = "sess-st-2"
 
-    sync_turn(
+    post_tool_call(
         session_id=session_id,
-        turn_data=None,
         sessions_dir=str(sess_dir),
     )
 
@@ -90,8 +91,8 @@ def test_sync_turn_empty_turn_data(tmp_path):
     events_file = session_dir / ".session-events.jsonl"
     assert events_file.exists()
     content = events_file.read_text(encoding="utf-8")
-    assert "files_touched" in content
-    assert "tool_count" in content
+    assert "tool_name" in content
+    assert "duration_ms" in content
 
 
 # ── on_session_end ─────────────────────────────────────────────────
