@@ -1,0 +1,12 @@
+{
+  "repo": "https://github.com/nvk/llm-wiki",
+  "version": "0.15.0",
+  "source_paths": [
+    "AGENTS.md",
+    "claude-plugin/.claude-plugin/plugin.json",
+    "claude-plugin/commands/wiki.md",
+    "claude-plugin/skills/wiki-manager/SKILL.md",
+    "claude-plugin/skills/wiki-manager/references/hub-resolution.md",
+    "claude-plugin/skills/wiki-manager/references/wiki-structure.md"
+  ]
+}

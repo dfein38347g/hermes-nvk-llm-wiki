@@ -1,0 +1,11 @@
+[project]
+name = "hermes-nvk-llm-wiki"
+version = "0.1.0"
+description = "Hermes adapter for nvk/llm-wiki"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
