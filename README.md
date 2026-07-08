@@ -1,6 +1,6 @@
 # hermes-nvk-llm-wiki
 
-A [Hermes](https://github.com/anomalyco/opencode) plugin adapter that syncs the
+A [Hermes](https://github.com/NousResearch/hermes-agent/tree/main) plugin adapter that syncs the
 [nvk/llm-wiki](https://github.com/nvk/llm-wiki) skill bundle into Hermes'
 managed-skill layout. Provides markdown adaptation, CLI management commands,
 session capture hooks, and a full session state machine with checkpointing,
