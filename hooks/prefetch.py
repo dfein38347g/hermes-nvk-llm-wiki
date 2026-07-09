@@ -1,27 +1,24 @@
-"""on_session_start hook — load checkpoint and inject rehydration context.
+"""on_session_start hook — invoke upstream session capture for rehydration.
 
-Called when a Hermes session starts. Returns rehydration context if a
-checkpoint exists from a prior session, or None for a fresh session.
+Called when a Hermes session starts. Delegates to upstream llm_wiki_session.py
+which reads recent session digests and outputs rehydration context.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
-from session import read_checkpoint, rehydrate
+from hooks.upstream_bridge import invoke as _upstream_invoke
 
 
-def on_session_start(session_id: str = "", **kwargs: Any) -> dict | None:
+def on_session_start(session_id: str = "", **kwargs: Any) -> str | None:
     """Load session checkpoint on session start for resume context.
 
-    Hermes passes: session_id.
+    Hermes passes: session_id, old_session_id, carry_over_context,
+    platform, model, context_length, conversation_id.
+
+    Returns rehydration context string if available, or None.
     """
     if not session_id:
         return None
-    sessions_dir = kwargs.get("sessions_dir")
-    session_dir = Path(sessions_dir) / session_id if sessions_dir else Path(session_id)
-    checkpoint = read_checkpoint(session_dir)
-    if not checkpoint:
-        return None
-    return rehydrate(session_dir)
+    return _upstream_invoke("SessionStart", session_id=session_id, **kwargs)

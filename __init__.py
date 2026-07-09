@@ -14,7 +14,7 @@ from hooks.on_session_end import on_session_end as session_end_handler
 from hooks.prefetch import on_session_start as on_session_start_handler
 from hooks.sync_turn import post_tool_call as post_tool_call_handler
 from hooks.system_prompt import pre_llm_call as pre_llm_call_handler
-from session import write_checkpoint
+from hooks.upstream_bridge import invoke as _upstream_invoke
 
 
 def register(ctx):
@@ -35,8 +35,6 @@ def register(ctx):
     ctx.register_hook("post_tool_call", post_tool_call_handler)
     ctx.register_hook(
         "on_session_finalize",
-        lambda **kw: write_checkpoint(
-            Path.home() / "wiki" / ".sessions", {"compacted": True}
-        ),
+        lambda **kw: _upstream_invoke("PreCompact", **kw),
     )
     ctx.register_hook("on_session_end", session_end_handler)
